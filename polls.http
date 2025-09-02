@@ -1,0 +1,84 @@
+### Clear the database for a clean test run
+DELETE http://localhost:8080/internal/clear
+
+### Create User One
+POST http://localhost:8080/users
+Content-Type: application/json
+
+{
+  "username": "UserOne",
+  "email": "user.one@example.com"
+}
+
+> {%
+  client.global.set("userOneId", response.body.id);
+%}
+
+### Get all users
+GET http://localhost:8080/users
+
+### Create User Two
+POST http://localhost:8080/users
+Content-Type: application/json
+
+{
+  "username": "UserTwo",
+  "email": "user.two@example.com"
+}
+
+> {%
+  client.global.set("userTwoId", response.body.id);
+%}
+
+### Get all users again
+GET http://localhost:8080/users
+
+### Create a new poll from User One
+POST http://localhost:8080/users/{{userOneId}}/polls
+Content-Type: application/json
+
+{
+  "question": "What is your favorite programming language?",
+  "publishedAt": "2025-09-02T10:00:00Z",
+  "validUntil": "2025-09-03T10:00:00Z"
+}
+
+> {%
+  client.global.set("pollId", response.body.id);
+  client.global.set("choiceOneId", response.body.choices[0].id);
+  client.global.set("choiceTwoId", response.body.choices[1].id);
+%}
+
+### Get all polls
+GET http://localhost:8080/polls
+
+### User Two votes for the first choice
+POST http://localhost:8080/users/{{userTwoId}}/votes
+Content-Type: application/json
+
+{
+  "pollId": "{{pollId}}",
+  "choiceId": "1"
+}
+
+> {%
+  client.global.set("voteId", response.body.id);
+%}
+
+### User Two updates their vote to the second choice
+PUT http://localhost:8080/users/{{userTwoId}}/votes/{{voteId}}
+Content-Type: application/json
+
+{
+  "pollId": "{{pollId}}",
+  "choiceId": "2"
+}
+
+### Get votes for the poll
+GET http://localhost:8080/polls/{{pollId}}/votes
+
+### User One deletes the poll
+DELETE http://localhost:8080/polls/{{pollId}}
+
+### Get votes for the poll again (should be an empty list)
+GET http://localhost:8080/polls/{{pollId}}/votes
