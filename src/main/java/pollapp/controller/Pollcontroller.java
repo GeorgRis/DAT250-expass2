@@ -2,10 +2,12 @@ package pollapp.controller;
 
 import pollapp.Poll;
 import pollapp.Pollmanager;
+import pollapp.PollRequest;
 import pollapp.Vote;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.CrossOrigin;
 
 import java.util.List;
 
@@ -16,6 +18,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping
+@CrossOrigin
 public class Pollcontroller {
 
     private final Pollmanager pollManager;
@@ -30,11 +33,20 @@ public class Pollcontroller {
     public List<Poll> getAllPolls() {
         return pollManager.getAllPolls();
     }
-
+    
     @PostMapping("/users/{userId}/polls")
-    public ResponseEntity<Poll> createPoll(@PathVariable String userId, @RequestBody Poll poll) {
-        Poll createdPoll = pollManager.createPoll(poll.getQuestion(), userId);
+    public ResponseEntity<Poll> createPoll(@PathVariable String userId, @RequestBody PollRequest pollRequest) {
+        Poll createdPoll = pollManager.createPoll(pollRequest.getQuestion(), userId, pollRequest.getOptions());
         return new ResponseEntity<>(createdPoll, HttpStatus.CREATED);
+    }
+    
+    @GetMapping("/polls/{pollId}")
+    public ResponseEntity<Poll> getPollById(@PathVariable String pollId) {
+        Poll poll = pollManager.getPollById(pollId);
+        if (poll != null) {
+            return new ResponseEntity<>(poll, HttpStatus.OK);
+        }
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
     @DeleteMapping("/polls/{pollId}")

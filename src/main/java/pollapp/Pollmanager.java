@@ -38,16 +38,25 @@ public class Pollmanager {
     }
 
     // -- Poll Methods --
-    public Poll createPoll(String question, String userId) {
+    public Poll createPoll(String question, String userId, List<String> options) {
         String id = UUID.randomUUID().toString();
-        // Corrected: Arguments are now in the correct order for the Poll constructor
         Poll poll = new Poll(id, question, Instant.now(), Instant.now().plusSeconds(86400), userId);
         polls.add(poll);
-        // Automatically add default choices for a new poll
-        Choice choice1 = new Choice(UUID.randomUUID().toString(), "Yes", 1);
-        Choice choice2 = new Choice(UUID.randomUUID().toString(), "No", 2);
-        poll.addChoice(choice1);
-        poll.addChoice(choice2);
+
+        // Add custom choices instead of hardcoded Yes/No
+        if (options != null && !options.isEmpty()) {
+            for (int i = 0; i < options.size(); i++) {
+                Choice choice = new Choice(UUID.randomUUID().toString(), options.get(i), i + 1);
+                poll.addChoice(choice);
+            }
+        } else {
+            // Fallback to default choices if no options provided
+            Choice choice1 = new Choice(UUID.randomUUID().toString(), "Yes", 1);
+            Choice choice2 = new Choice(UUID.randomUUID().toString(), "No", 2);
+            poll.addChoice(choice1);
+            poll.addChoice(choice2);
+        }
+
         return poll;
     }
 
@@ -70,7 +79,6 @@ public class Pollmanager {
         }
         // Remove the poll itself
         polls.remove(pollToDelete);
-        // **BUG FIX:** Remove all votes associated with this poll
         votes.removeIf(vote -> vote.getPollId().equals(id));
         return true;
     }
@@ -78,7 +86,6 @@ public class Pollmanager {
     // -- Vote Methods --
     public Vote createVote(String userId, String pollId, String choiceId) {
         String id = UUID.randomUUID().toString();
-        // Add the missing Instant object for the constructor
         Vote vote = new Vote(id, userId, pollId, choiceId, Instant.now());
         votes.add(vote);
         return vote;
@@ -98,5 +105,9 @@ public class Pollmanager {
         return votes.stream()
                 .filter(vote -> vote.getPollId().equals(pollId))
                 .collect(Collectors.toList());
+    }
+
+    public Poll getPoll(String pollId) {
+        return getPollById(pollId);
     }
 }
