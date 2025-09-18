@@ -3,7 +3,7 @@ package pollapp.controller;
 import pollapp.Poll;
 import pollapp.Pollmanager;
 import pollapp.PollRequest;
-import pollapp.Vote;
+import pollapp.Vote;  // Changed from JPA Vote to pollapp Vote
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -33,13 +33,13 @@ public class Pollcontroller {
     public List<Poll> getAllPolls() {
         return pollManager.getAllPolls();
     }
-    
+
     @PostMapping("/users/{userId}/polls")
     public ResponseEntity<Poll> createPoll(@PathVariable String userId, @RequestBody PollRequest pollRequest) {
         Poll createdPoll = pollManager.createPoll(pollRequest.getQuestion(), userId, pollRequest.getOptions());
         return new ResponseEntity<>(createdPoll, HttpStatus.CREATED);
     }
-    
+
     @GetMapping("/polls/{pollId}")
     public ResponseEntity<Poll> getPollById(@PathVariable String pollId) {
         Poll poll = pollManager.getPollById(pollId);
