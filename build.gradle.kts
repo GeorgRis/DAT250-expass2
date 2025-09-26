@@ -29,6 +29,9 @@ dependencies {
     implementation("com.h2database:h2:2.3.232")
 
     implementation("jakarta.persistence:jakarta.persistence-api:3.2.0")
+
+    implementation("org.springframework.kafka:spring-kafka")
+    testImplementation("org.springframework.kafka:spring-kafka-test")
 }
 
 tasks.withType<Test> {

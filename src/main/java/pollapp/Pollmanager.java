@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import pollapp.service.KafkaService;
+
 /**
  * Manages all the application data. This class acts as a simple,
  * in-memory database for users, polls, and votes.
@@ -17,6 +19,7 @@ public class Pollmanager {
     private final List<User> users = new ArrayList<>();
     private final List<Poll> polls = new ArrayList<>();
     private final List<Vote> votes = new ArrayList<>();
+    private KafkaService kafkaService;
 
     // A method to clear all data. This is useful for testing.
     public void clearData() {
@@ -31,6 +34,10 @@ public class Pollmanager {
         User user = new User(id, username, email);
         users.add(user);
         return user;
+    }
+
+    public void setKafkaService(KafkaService kafkaService) {
+        this.kafkaService = kafkaService;
     }
 
     public List<User> getAllUsers() {
@@ -57,8 +64,15 @@ public class Pollmanager {
             poll.addChoice(choice2);
         }
 
+        // Create Kafka topic and publish event
+        if (kafkaService != null) {
+            kafkaService.createTopicForPoll(id);
+            kafkaService.publishPollCreatedEvent(id, question, userId);
+        }
+
         return poll;
     }
+
 
     public List<Poll> getAllPolls() {
         return new ArrayList<>(polls);
@@ -109,5 +123,15 @@ public class Pollmanager {
 
     public Poll getPoll(String pollId) {
         return getPollById(pollId);
+    }
+
+    public Vote createVoteWithEvent(String userId, String pollId, String choiceId) {
+        Vote vote = createVote(userId, pollId, choiceId);
+
+        if (kafkaService != null && vote != null) {
+            kafkaService.publishVoteEvent(pollId, choiceId, userId, "VOTE_CAST");
+        }
+
+        return vote;
     }
 }

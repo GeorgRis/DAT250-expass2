@@ -3,6 +3,7 @@ package pollapp.controller;
 import pollapp.Poll;
 import pollapp.Pollmanager;
 import pollapp.PollRequest;
+import pollapp.service.KafkaService;
 import pollapp.Vote;  // Changed from JPA Vote to pollapp Vote
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,9 +23,12 @@ import java.util.List;
 public class Pollcontroller {
 
     private final Pollmanager pollManager;
+    private final KafkaService kafkaService;
 
-    public Pollcontroller(Pollmanager pollManager) {
+    public Pollcontroller(Pollmanager pollManager, KafkaService kafkaService) {
         this.pollManager = pollManager;
+        this.kafkaService = kafkaService;
+        pollManager.setKafkaService(kafkaService);
     }
 
     // -- Poll Endpoints --
@@ -68,7 +72,7 @@ public class Pollcontroller {
 
     @PostMapping("/users/{userId}/votes")
     public ResponseEntity<Vote> createVote(@PathVariable String userId, @RequestBody Vote vote) {
-        Vote createdVote = pollManager.createVote(userId, vote.getPollId(), vote.getChoiceId());
+        Vote createdVote = pollManager.createVoteWithEvent(userId, vote.getPollId(), vote.getChoiceId());
         if (createdVote != null) {
             return new ResponseEntity<>(createdVote, HttpStatus.CREATED);
         }
