@@ -9,10 +9,7 @@ This assignment focuses on integrating Apache Kafka message broker with the exis
 ### Architecture Choices
 
 **Message Broker**: Apache Kafka was chosen for this implementation due to its:
-- High throughput and scalability
-- Excellent event sourcing capabilities
-- Strong durability guarantees
-- Rich ecosystem and Spring Boot integration
+- I already know how to use
 
 ### Key Components Implemented
 
