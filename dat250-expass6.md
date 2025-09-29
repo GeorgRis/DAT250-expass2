@@ -8,7 +8,7 @@ This assignment focuses on integrating Apache Kafka message broker with the exis
 
 ### Architecture Choices
 
-**Message Broker**: Apache Kafka was chosen for this implementation due to its:
+**Message Broker**: Apache Kafka was chosen for this implementation:
 - I already know how to use
 
 ### Key Components Implemented
